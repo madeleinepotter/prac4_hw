@@ -1,0 +1,59 @@
+---
+title: "practical4_hw"
+output: html_document
+date: "2023-11-01"
+---
+```{r}
+## loading in packages
+
+library(tidyverse)
+library(here)
+library(janitor)
+library(sf)
+
+install.packages(countrycode)
+library(countrycode)
+
+```
+
+reading in HDI data
+
+```{r}
+hdi <- read_csv(here::here("HDR21-22_Composite_indices_complete_time_series.csv"))
+
+hdi <- drop_na(hdi)
+
+```
+read in world data
+
+```{r}
+
+world <- st_read(here::here("World_Countries_Generalized", "World_Countries_Generalized.shp"))
+```
+##columns
+
+```{r}
+#filter data by selecting columns we want
+
+hdi_2 <- hdi%>%
+  clean_names()%>%
+  select(iso3, country, gii_2010, gii_2019)
+
+
+#creating new column for difference in GII
+
+hdi_diff <- hdi_2 %>%
+  mutate(gii_diff = gii_2019 - gii_2010)
+```
+
+## joining hdi_diff to world
+
+```{r}
+
+joined_hdi <- world %>% 
+  clean_names() %>%
+  left_join(., 
+            hdi_diff,
+            by = c("country" = "country"))
+```
+
